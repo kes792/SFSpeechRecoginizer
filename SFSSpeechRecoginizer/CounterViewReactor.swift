@@ -12,8 +12,10 @@ import RxSwift
 final class CounterViewReactor: Reactor, RecognizerDelegate {
     
     
+    var speaker = Speak()
     
     var speechRecognizer: Recognizer!
+    //let speaker =
     var transcriptionString: String? = ""
     // Action is an user interaction
     enum Action {
@@ -22,8 +24,8 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
         
         case startRecording
         case stopRecording
-        case changeRecognizeString
-
+        case cancelRecording
+        case sayString
     }
     
     // Mutate is a state manipulator which is not exposed to a view
@@ -33,10 +35,10 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
         case setLoading(Bool)
         
         case startRecognization
-        case stopRecognization
-        
-        case getRecognizeString(String)
-        case changeRecognizeString
+        case setRecognizeString(String)
+        case resetRecognizeString(String)
+        case sayString
+
     }
     
     // State is a current view state
@@ -76,7 +78,6 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
                 ])
             
         case .startRecording:
-            
             return Observable.concat([
                 .just(Mutation.startRecognization),
                 .just(Mutation.setLoading(true)),
@@ -84,19 +85,24 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
             
         case .stopRecording:
             return Observable.concat([
-                Observable.just(Mutation.setLoading(false)).delay(.milliseconds(800), scheduler: MainScheduler.instance),
-
-                speechRecognizer.stopRecording().map(Mutation.getRecognizeString),
-                //Observable.just(Mutation.stopRecognization),
-                
+                Observable.just(Mutation.setLoading(false)).delay(.milliseconds(1000), scheduler: MainScheduler.instance),
+                speechRecognizer.stopRecording().map(Mutation.setRecognizeString),
                 ])
-        
-        case .changeRecognizeString:
+        case .cancelRecording:
             return Observable.concat([
-                Observable.just(Mutation.changeRecognizeString),
+                Observable.just(Mutation.setLoading(false)),
+                speechRecognizer.stopRecording().map(Mutation.resetRecognizeString)
                 ])
- 
+        case .sayString:
+            return Observable.concat([
+                Observable.just(Mutation.setLoading(true)),
+                Observable.just(Mutation.sayString).delay(.milliseconds(500), scheduler: MainScheduler.instance),
+                Observable.just(Mutation.setLoading(false)),
+                ])
         }
+        
+        
+    
     }
     
     // Mutation -> State
@@ -118,34 +124,21 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
             speechRecognizer.startRecording()
             state.recognizeString = ""
             
-        case .stopRecognization:
-            state.recognizeString = ""
-        
-        case let .getRecognizeString(recognizeString) :
-            print("[reduce] .getRecognizeString(recognizeString) = \(recognizeString)")
+        case let .setRecognizeString(recognizeString) :
+            print("[reduce] .setRecognizeString(recognizeString) = \(recognizeString)")
             state.recognizeString = recognizeString //!= nil ? transcriptionString! : "."
             
-        case .changeRecognizeString :
-            print("[reduce] .changeRecognizeString = \(String(describing: self.transcriptionString))")
-            state.recognizeString = self.transcriptionString ?? "" //!= nil ? transcriptionString! : "."
-        
+        case let .resetRecognizeString(recognizeString):
+            print("[reduce] .resetRecognizeString(recognizeString) = \(recognizeString)")
+            state.recognizeString = ""
+            
+        case .sayString:
+            speaker.sayThis(state.recognizeString)
         }
         
         return state
     }
     
-    
-    // MARK: SBSpeechRecognitionDelegate
-    func speechRecognitionFinished(transcription:String) {
-        print("[speechRecognitionFinished] transcription = \(transcription)")
-        self.transcriptionString = transcription
-       
-    }
-    
-    func speechRecognitionPartialResult(transcription:String) {
-        print("[speechRecognitionPartialResult] transcription = \(transcription)")
-        self.transcriptionString = transcription
-    }
     
     func speechRecognitionTimedOut() {
         //toggleSpeechRecognition()
@@ -154,7 +147,7 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
         OperationQueue.main.addOperation {
             //self.microphoneButton.isEnabled = isButtonEnabled
         }
-    
+        
     }
     
 }

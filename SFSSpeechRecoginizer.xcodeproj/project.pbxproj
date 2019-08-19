@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		98150B38B889422838719CB6 /* Pods_SFSSpeechRecoginizer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77F9BF32D9F1D994B9841B6B /* Pods_SFSSpeechRecoginizer.framework */; };
+		B744252C230AA7CC00E9A7CF /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B744252B230AA7CC00E9A7CF /* Speaker.swift */; };
 		B7528C0F23064A6B00B7B799 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7528C0E23064A6B00B7B799 /* AppDelegate.swift */; };
 		B7528C1423064A6B00B7B799 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B7528C1223064A6B00B7B799 /* Main.storyboard */; };
 		B7528C1623064A6E00B7B799 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B7528C1523064A6E00B7B799 /* Assets.xcassets */; };
@@ -21,6 +22,7 @@
 		6FFDA49C1F2AA89F2A9A1BF6 /* Pods-SFSSpeechRecoginizer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SFSSpeechRecoginizer.debug.xcconfig"; path = "Target Support Files/Pods-SFSSpeechRecoginizer/Pods-SFSSpeechRecoginizer.debug.xcconfig"; sourceTree = "<group>"; };
 		77F9BF32D9F1D994B9841B6B /* Pods_SFSSpeechRecoginizer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SFSSpeechRecoginizer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3A63E19D32A41B02B392494 /* Pods-SFSSpeechRecoginizer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SFSSpeechRecoginizer.release.xcconfig"; path = "Target Support Files/Pods-SFSSpeechRecoginizer/Pods-SFSSpeechRecoginizer.release.xcconfig"; sourceTree = "<group>"; };
+		B744252B230AA7CC00E9A7CF /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		B7528C0B23064A6B00B7B799 /* SFSSpeechRecoginizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SFSSpeechRecoginizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7528C0E23064A6B00B7B799 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B7528C1323064A6B00B7B799 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 				B7528C2023064C2400B7B799 /* CounterViewController.swift */,
 				B7528C2123064C2400B7B799 /* CounterViewReactor.swift */,
 				B7528C2223064C2400B7B799 /* Recognizer.swift */,
+				B744252B230AA7CC00E9A7CF /* Speaker.swift */,
 				B7528C1223064A6B00B7B799 /* Main.storyboard */,
 				B7528C1523064A6E00B7B799 /* Assets.xcassets */,
 				B7528C1723064A6E00B7B799 /* LaunchScreen.storyboard */,
@@ -211,6 +214,7 @@
 			files = (
 				B7528C2523064C2400B7B799 /* Recognizer.swift in Sources */,
 				B7528C2323064C2400B7B799 /* CounterViewController.swift in Sources */,
+				B744252C230AA7CC00E9A7CF /* Speaker.swift in Sources */,
 				B7528C2423064C2400B7B799 /* CounterViewReactor.swift in Sources */,
 				B7528C0F23064A6B00B7B799 /* AppDelegate.swift in Sources */,
 			);

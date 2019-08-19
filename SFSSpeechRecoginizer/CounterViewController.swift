@@ -24,6 +24,9 @@ final class CounterViewController: UIViewController, StoryboardView {
     @IBOutlet var valueLabel: UILabel!
     @IBOutlet var activityIndicatorView: UIActivityIndicatorView!
     
+    
+    @IBOutlet var speekerButton: UIButton!
+    
     var disposeBag = DisposeBag()
     
     
@@ -46,11 +49,21 @@ final class CounterViewController: UIViewController, StoryboardView {
             .disposed(by: disposeBag)
         
        
-        
         microphoneButton.rx.controlEvent([.touchUpInside])
             .map { Reactor.Action.stopRecording }  // Convert to Action.increase
             .bind(to: reactor.action)         // Bind to reactor.action
             .disposed(by: disposeBag)
+        
+        microphoneButton.rx.controlEvent([.touchUpOutside])
+            .map { Reactor.Action.cancelRecording }  // Convert to Action.increase
+            .bind(to: reactor.action)         // Bind to reactor.action
+            .disposed(by: disposeBag)
+        
+        speekerButton.rx.tap
+            .map { Reactor.Action.sayString }  // Convert to Action.increase
+            .bind(to: reactor.action)         // Bind to reactor.action
+            .disposed(by: disposeBag)
+        
         
         // State
         reactor.state.map { $0.value }   // 10

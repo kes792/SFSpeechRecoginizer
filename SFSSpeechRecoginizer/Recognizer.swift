@@ -13,8 +13,6 @@ import RxSwift
 import Speech
 
 public protocol RecognizerDelegate: class {
-    func speechRecognitionFinished(transcription:String)
-    func speechRecognitionPartialResult(transcription:String)
     func speechRecognitionRecordingAuthorized(authrize: Bool)
     func speechRecognitionTimedOut()
 }
@@ -36,7 +34,6 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
     
     public override init() {
         super.init()
-        
         setupSpeechRecognition()
     }
     
@@ -62,7 +59,11 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
     private func restartSpeechTimeout() {
         speechRecognitionTimeout?.invalidate()
         
-        speechRecognitionTimeout = Timer.scheduledTimer(timeInterval:speechTimeoutInterval, target: self, selector: #selector(timedOut), userInfo: nil, repeats: false)
+        speechRecognitionTimeout = Timer.scheduledTimer(timeInterval:speechTimeoutInterval,
+                                                        target: self,
+                                                        selector: #selector(timedOut),
+                                                        userInfo: nil,
+                                                        repeats: false)
     }
     
     public func startRecording()  {
@@ -90,7 +91,6 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
         let inputNode = audioEngine.inputNode
         guard let recognitionRequest = recognitionRequest else {
             fatalError("Unable to created a SFSpeechAudioBufferRecognitionRequest object")
-    
         }
         
         // Configure request so that results are returned before audio recording is finished
@@ -107,7 +107,6 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
                 print("[recognitionTask] speechRecognitionPartialResult = \(self.transcriptionString)")
 
                 self.transcriptionString = result.bestTranscription.formattedString
-
             }
             
             if error != nil || isFinal {
@@ -121,11 +120,7 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
             if isFinal {
                 //self.delegate?.speechRecognitionFinished(transcription: result!.bestTranscription.formattedString)
                 print("[recognitionTask] speechRecognitionFinished = \(self.transcriptionString)")
-
                 self.transcriptionString = result!.bestTranscription.formattedString
-                
-                //self.stopRecording().map(CounterViewReactor.Mutation.getRecognizeString)
-           
             }
             else {
                 if error == nil {
@@ -133,9 +128,7 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
                 }
                 else {
                     // cancel voice recognition
-
                 }
-                //self.transcriptionString = result!.bestTranscription.formattedString
             }
         }
         
@@ -169,8 +162,6 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
         speechRecognitionTimeout = nil
         
         print("[stopRecording] self.transcriptionString = \(self.transcriptionString)")
-
-        
         return Observable<String>.create{observer in
             //对订阅者发出了.next事件，且携带了一个数据"hangge.com"
             observer.onNext(self.transcriptionString)
