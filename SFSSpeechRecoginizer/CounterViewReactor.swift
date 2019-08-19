@@ -14,7 +14,7 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
     
     
     var speechRecognizer: Recognizer!
-    var transcriptionString: String? = nil
+    var transcriptionString: String? = ""
     // Action is an user interaction
     enum Action {
         case increase
@@ -34,25 +34,22 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
         
         case startRecognization
         case stopRecognization
-        case getRecognizeString
-
+        
+        case getRecognizeString(String)
+        case changeRecognizeString
     }
     
     // State is a current view state
     struct State {
-        var value: Int
-        var isLoading: Bool
-        var recognizeString: String
+        var value: Int = 0
+        var isLoading: Bool = false
+        var recognizeString: String = ""
     }
     
     let initialState: State
     
     init() {
-        self.initialState = State(
-            value: 0, // start from 0
-            isLoading: false,
-            recognizeString: ""
-        )
+        self.initialState = State()
         
         speechRecognizer = Recognizer()
         speechRecognizer.delegate = self
@@ -81,27 +78,31 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
         case .startRecording:
             
             return Observable.concat([
-                Observable.just(Mutation.startRecognization),
-                Observable.just(Mutation.setLoading(true)),
+                .just(Mutation.startRecognization),
+                .just(Mutation.setLoading(true)),
                 ])
             
         case .stopRecording:
             return Observable.concat([
-                Observable.just(Mutation.setLoading(false)).delay(.milliseconds(1000), scheduler: MainScheduler.instance),
-                Observable.just(Mutation.stopRecognization),
+                speechRecognizer.stopRecording().map(Mutation.getRecognizeString),
+                Observable.just(Mutation.setLoading(false)),
+                //Observable.just(Mutation.stopRecognization),
                 
                 ])
-            
+        
         case .changeRecognizeString:
             return Observable.concat([
-                Observable.just(Mutation.getRecognizeString),
+                Observable.just(Mutation.changeRecognizeString),
                 ])
+ 
         }
     }
     
     // Mutation -> State
     func reduce(state: State, mutation: Mutation) -> State {
+        
         var state = state
+        
         switch mutation {
         case .increaseValue:
             state.value += 1
@@ -113,20 +114,21 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
             state.isLoading = isLoading
             
         case .startRecognization:
-            do {
-                try speechRecognizer.startRecording()
-            }
-            catch {
-                print(error)
-            }
+            speechRecognizer.startRecording()
+            state.recognizeString = ""
             
         case .stopRecognization:
-            speechRecognizer.stopRecording()
-            state.recognizeString = transcriptionString != nil ? transcriptionString! : "."
+            state.recognizeString = ""
         
-        case .getRecognizeString:
-            state.recognizeString = transcriptionString != nil ? transcriptionString! : "."
-    }
+        case let .getRecognizeString(recognizeString) :
+            print("[reduce] .getRecognizeString(recognizeString) = \(recognizeString)")
+            state.recognizeString = recognizeString //!= nil ? transcriptionString! : "."
+            
+        case .changeRecognizeString :
+            print("[reduce] .changeRecognizeString = \(String(describing: self.transcriptionString))")
+            state.recognizeString = self.transcriptionString ?? "" //!= nil ? transcriptionString! : "."
+        
+        }
         
         return state
     }
@@ -135,14 +137,13 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
     // MARK: SBSpeechRecognitionDelegate
     func speechRecognitionFinished(transcription:String) {
         print("[speechRecognitionFinished] transcription = \(transcription)")
-        transcriptionString = transcription
-        mutate(action: .changeRecognizeString)
+        self.transcriptionString = transcription
+       
     }
     
     func speechRecognitionPartialResult(transcription:String) {
         print("[speechRecognitionPartialResult] transcription = \(transcription)")
-        transcriptionString = transcription
-        mutate(action: .changeRecognizeString)
+        self.transcriptionString = transcription
     }
     
     func speechRecognitionTimedOut() {

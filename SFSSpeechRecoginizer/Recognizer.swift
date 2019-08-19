@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import RxSwift
 
 import Speech
 
@@ -29,6 +30,9 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
     private var recognitionTask: SFSpeechRecognitionTask?
     
     private let audioEngine = AVAudioEngine()
+    
+    var transcriptionString = ""
+
     
     public override init() {
         super.init()
@@ -61,7 +65,7 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
         speechRecognitionTimeout = Timer.scheduledTimer(timeInterval:speechTimeoutInterval, target: self, selector: #selector(timedOut), userInfo: nil, repeats: false)
     }
     
-    public func startRecording() throws {
+    public func startRecording()  {
      
         if let recognitionTask = recognitionTask {
             recognitionTask.cancel()
@@ -96,9 +100,14 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
         // We keep a reference to the task so that it can be cancelled.
         recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { result, error in
             var isFinal = false
+           
             if let result = result {
                 isFinal = result.isFinal
-                self.delegate?.speechRecognitionPartialResult(transcription: result.bestTranscription.formattedString)
+                //self.delegate?.speechRecognitionPartialResult(transcription: result.bestTranscription.formattedString)
+                print("[recognitionTask] speechRecognitionPartialResult = \(self.transcriptionString)")
+
+                self.transcriptionString = result.bestTranscription.formattedString
+
             }
             
             if error != nil || isFinal {
@@ -110,8 +119,13 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
             }
             
             if isFinal {
-                self.delegate?.speechRecognitionFinished(transcription: result!.bestTranscription.formattedString)
-                self.stopRecording()
+                //self.delegate?.speechRecognitionFinished(transcription: result!.bestTranscription.formattedString)
+                print("[recognitionTask] speechRecognitionFinished = \(self.transcriptionString)")
+
+                self.transcriptionString = result!.bestTranscription.formattedString
+                
+                self.stopRecording().map(CounterViewReactor.Mutation.getRecognizeString)
+           
             }
             else {
                 if error == nil {
@@ -119,7 +133,9 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
                 }
                 else {
                     // cancel voice recognition
+
                 }
+                //self.transcriptionString = result!.bestTranscription.formattedString
             }
         }
         
@@ -129,17 +145,21 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
         }
         
         audioEngine.prepare()
+        do{
+            try audioEngine.start()
+        }catch {
+            print("audioEngine start failed")
+        }
         
-        try audioEngine.start()
     }
     
     @objc private func timedOut() {
-        stopRecording()
+        //stopRecording()
         
         self.delegate?.speechRecognitionTimedOut()
     }
     
-    public func stopRecording() {
+    public func stopRecording() -> Observable<String> {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0) // Remove tap on bus when stopping recording.
         
@@ -147,5 +167,17 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
         
         speechRecognitionTimeout?.invalidate()
         speechRecognitionTimeout = nil
+        
+        print("[stopRecording] self.transcriptionString = \(self.transcriptionString)")
+
+        
+        return Observable<String>.create{observer in
+            //对订阅者发出了.next事件，且携带了一个数据"hangge.com"
+            observer.onNext(self.transcriptionString)
+            //对订阅者发出了.completed事件
+            observer.onCompleted()
+            //因为一个订阅行为会有一个Disposable类型的返回值，所以在结尾一定要returen一个Disposable
+            return Disposables.create()
+        }
     }
 }

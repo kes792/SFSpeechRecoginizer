@@ -45,6 +45,8 @@ final class CounterViewController: UIViewController, StoryboardView {
             .bind(to: reactor.action)         // Bind to reactor.action
             .disposed(by: disposeBag)
         
+       
+        
         microphoneButton.rx.controlEvent([.touchUpInside])
             .map { Reactor.Action.stopRecording }  // Convert to Action.increase
             .bind(to: reactor.action)         // Bind to reactor.action
