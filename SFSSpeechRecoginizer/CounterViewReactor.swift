@@ -84,8 +84,9 @@ final class CounterViewReactor: Reactor, RecognizerDelegate {
             
         case .stopRecording:
             return Observable.concat([
+                Observable.just(Mutation.setLoading(false)).delay(.milliseconds(800), scheduler: MainScheduler.instance),
+
                 speechRecognizer.stopRecording().map(Mutation.getRecognizeString),
-                Observable.just(Mutation.setLoading(false)),
                 //Observable.just(Mutation.stopRecognization),
                 
                 ])

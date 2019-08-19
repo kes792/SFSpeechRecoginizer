@@ -124,7 +124,7 @@ class Recognizer :NSObject, SFSpeechRecognizerDelegate{
 
                 self.transcriptionString = result!.bestTranscription.formattedString
                 
-                self.stopRecording().map(CounterViewReactor.Mutation.getRecognizeString)
+                //self.stopRecording().map(CounterViewReactor.Mutation.getRecognizeString)
            
             }
             else {
