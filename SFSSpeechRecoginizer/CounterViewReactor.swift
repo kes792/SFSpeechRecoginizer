@@ -12,8 +12,7 @@ import RxSwift
 final class CounterViewReactor: Reactor, RecognizerDelegate {
     
     
-    var speaker = Speak()
-    
+    var speaker = Speaker()
     var speechRecognizer: Recognizer!
     //let speaker =
     var transcriptionString: String? = ""

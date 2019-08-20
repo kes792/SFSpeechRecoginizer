@@ -9,28 +9,30 @@
 import Foundation
 import AVFoundation
 
-class Speak {
-    
+class Speaker : NSObject {
     let voices = AVSpeechSynthesisVoice.speechVoices()
     let voiceSynth = AVSpeechSynthesizer()
     var voiceToUse: AVSpeechSynthesisVoice?
     
-    init() {
+    override init() {
+        super.init()
+        /*
         for voice in voices {
-            if voice.name == "Samantha (Enhanced)"  && voice.quality == .enhanced {
+            if voice.name == "Mei-Jia"{//Sin-Ji"{//"Li-mu"{//"Ting-Ting"  {
                 voiceToUse = voice
             }
         }
+         */
+        voiceToUse = AVSpeechSynthesisVoice(language: "zh-CN")
+        voiceSynth.delegate = self
     }
     
-    
     public func sayThis(_ phrase: String){
-        let utterance = AVSpeechUtterance(string: phrase)
         
-
-        
-        
-        voiceSynth.speak(utterance)
+        var utterance = AVSpeechUtterance(string: phrase)
+        if(phrase.count == 0){
+            utterance = AVSpeechUtterance(string: "小樂精靈")
+        }
         
         do {
             try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord, mode: .default, options: .defaultToSpeaker)
@@ -39,11 +41,10 @@ class Speak {
             print("audioSession properties weren't set because of an error.")
         }
         
-        utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
+        utterance.voice = voiceToUse
         utterance.rate = 0.5
         
-        let synth = AVSpeechSynthesizer()
-        synth.speak(utterance)
+        voiceSynth.speak(utterance)
         
         do {
             disableAVSession()
@@ -57,4 +58,20 @@ class Speak {
             print("audioSession properties weren't disable.")
         }
     }
+    
+    
+
+
 }
+
+extension Speaker: AVSpeechSynthesizerDelegate {
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        print("All done")
+    }
+    
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
+        print("Start")
+    }
+}
+
+
